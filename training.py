@@ -8,6 +8,8 @@ from keras.layers import Conv2D, MaxPooling2D, Dropout, Convolution2D, Flatten, 
 from keras.utils import np_utils
 import sklearn
 from sklearn.model_selection import train_test_split
+import tensorflow as tf
+
 if __name__ == '__main__':
     path ="input_path"
     listing = os.listdir(path)
@@ -72,8 +74,15 @@ if __name__ == '__main__':
 
     # Reshaping the data to pass to CNN
     X_train = X_train.reshape(X_train.shape[0], 3, 128, 128)
+
     # X_val = X_val.reshape(X_val.shape[0], 3, 128, 128)
     X_test = X_test.reshape(X_test.shape[0], 3, 128, 128)
+
+    X_train=np.swapaxes(X_train,1,3);
+    X_train=np.swapaxes(X_train,1,2);
+    X_test=np.swapaxes(X_test,1,3);
+    X_test=np.swapaxes(X_test,1,2);
+
 
     # Keras Training Parameters
     batch_size = 50  # 한번에 몇개씩 풀것인지
@@ -100,11 +109,17 @@ if __name__ == '__main__':
 
     model = Sequential()
 
+
+
+
     model.add(Conv2D(nb_filters, (nb_conv, nb_conv),
                      padding="valid",
                      activation='relu',
-                     input_shape=(img_channels, img_rows, img_col),
-                     data_format='channels_first'))
+                     input_shape=( img_rows, img_col,img_channels),
+
+                     data_format='channels_last'))
+                     #data_format='channels_last'))
+                    #데이터 포맷은 애초에 74행에서 3 ,128,128이었으니 어쩔수 없이 채널퍼스트가 맞다.
 
     model.add(Conv2D(nb_filters, (nb_conv, nb_conv), activation='relu'))
     model.add(MaxPooling2D(pool_size=(nb_pool, nb_pool)))
@@ -126,11 +141,26 @@ if __name__ == '__main__':
     model.compile(loss='categorical_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
-
+    model.summary()
     #------------------------------------------------------------------
 
-    history = model.fit(X_train, y_train, batch_size=batch_size, epochs=nb_epoch,
+    strategy = tf.distribute.MirroredStrategy()
+    with strategy.scope():
+        history = model.fit(X_train, y_train, batch_size=batch_size, epochs=nb_epoch,
                         verbose=1, validation_data=(X_test, y_test))
+
+    model.save_weights("eye1.h5")
+    model.save('eye2.h5')
+    '''
+    save() saves the weights and the model structure to a single HDF5 file. 
+    I believe it also includes things like the optimizer state. 
+    Then you can use that HDF5 file with load() to reconstruct 
+    the whole model, including weights.    
+    save_weights() only saves the weights to HDF5 and nothing else. 
+    You need extra code to reconstruct the model from a JSON file.
+    
+    '''
+
     #model.fit에서 오류.
 
     print("--------------")
