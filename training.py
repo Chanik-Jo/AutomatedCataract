@@ -46,15 +46,7 @@ if __name__ == '__main__':
     data, label = sklearn.utils.shuffle(imatrix, label, random_state=2)
     train_data = [data, label] # 일자로 배열된 이미지 결과 0/1
 
-    # Keras Training Parameters
-    batch_size = 32
-    nb_classes = 2
-    nb_epoch = 30
-    img_rows, img_col = 128, 128
-    img_channels = 3
-    nb_filters = 32
-    nb_pool = 2
-    nb_conv = 3
+
 
     (X, y) = (train_data[0], train_data[1]) #traindata[0]은 1차열배열로 변환된 이미지 traindata[1]은 정답.
 
@@ -82,6 +74,16 @@ if __name__ == '__main__':
     X_train = X_train.reshape(X_train.shape[0], 3, 128, 128)
     # X_val = X_val.reshape(X_val.shape[0], 3, 128, 128)
     X_test = X_test.reshape(X_test.shape[0], 3, 128, 128)
+
+    # Keras Training Parameters
+    batch_size = 50  # 한번에 몇개씩 풀것인지
+    nb_classes = 2
+    nb_epoch = 30  # 총 몇회 반복할것인지.
+    img_rows, img_col = 128, 128
+    img_channels = 3
+    nb_filters = 32
+    nb_pool = 2
+    nb_conv = 3
 
     y_train = np_utils.to_categorical(y_train, nb_classes)
     # y_val = np_utils.to_categorical(y_val, nb_classes)
@@ -129,6 +131,7 @@ if __name__ == '__main__':
 
     history = model.fit(X_train, y_train, batch_size=batch_size, epochs=nb_epoch,
                         verbose=1, validation_data=(X_test, y_test))
+    #model.fit에서 오류.
 
     print("--------------")
     print(history.history)
