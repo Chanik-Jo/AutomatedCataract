@@ -9,7 +9,11 @@ from keras.utils import np_utils
 import sklearn
 from sklearn.model_selection import train_test_split
 import tensorflow as tf
+import warnings
 
+warnings.filterwarnings(action='ignore')
+
+#출처: https://haonly.tistory.com/38 [Haonly's Blog]
 if __name__ == '__main__':
     path ="input_path"
     listing = os.listdir(path)
@@ -89,7 +93,8 @@ if __name__ == '__main__':
     # Keras Training Parameters
     batch_size = 50  # 한번에 몇개씩 풀것인지
     nb_classes = 2
-    nb_epoch = 30  # 총 몇회 반복할것인지.
+    nb_epoch = 1  # 총 몇회 반복할것인지.
+
     img_rows, img_col = 128, 128
     img_channels = 3
     nb_filters = 32
@@ -108,7 +113,8 @@ if __name__ == '__main__':
 
     strategy = tf.distribute.MirroredStrategy()
     #야 진짜 이젠 학습이다.
-    with strategy.scope():# gpu풀가동!
+    #with strategy.scope():# gpu풀가동!
+    with tf.device('/device:GPU:0'):
         model = Sequential()
 
 
