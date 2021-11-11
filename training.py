@@ -1,5 +1,5 @@
 import os
-
+from keras import backend as K
 from keras.callbacks import EarlyStopping
 import cv2 as cv
 import numpy as np
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     # Keras Training Parameters
     batch_size = 50  # 한번에 몇개씩 풀것인지
     nb_classes = 2
-    nb_epoch = 1  # 총 몇회 반복할것인지.
+    nb_epoch = 5  # 총 몇회 반복할것인지.
 
     img_rows, img_col = 128, 128
     img_channels = 3
@@ -185,9 +185,20 @@ if __name__ == '__main__':
     save_weights() only saves the weights to HDF5 and nothing else. 
     You need extra code to reconstruct the model from a JSON file.
     
+    
+    model_json = model.to_json()
+    with open("model.json", "w") as json_file:
+    json_file.write(model_json)
+    # serialize weights to HDF5
+    model.save_weights("model.h5")
+    model.save("whole_model.h5")
+    print("Saved model to disk")
+    
     '''
 
     #model.fit에서 오류.
 
     print("--------------")
     print(history.history)
+
+    K.clear_session()#multiprocess.py 오류 안뜨게 만드려는 목적.  왜뜨는진 모르겠지만 일단 막아야지.
