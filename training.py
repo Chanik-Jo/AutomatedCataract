@@ -148,6 +148,8 @@ if __name__ == '__main__':
 
 
         model.compile(loss='categorical_crossentropy',
+                      #https://cheris8.github.io/artificial%20intelligence/DL-Keras-Loss-Function/
+                      #결과값이 [1,0] , [0,1] 식으로 나올때 사용한다.
                       optimizer='adam',#알고봤더니 이게 adagrad 등등 여러방법이 짬뽕되어 안정적인 거였음
                       metrics=['accuracy']
                       )
@@ -177,7 +179,12 @@ if __name__ == '__main__':
 
         
         '''
-        early_stopping = tf.keras.callbacks.EarlyStopping(patience=5)
+        early_stopping = tf.keras.callbacks.EarlyStopping(
+            mode="auto",
+            patience=5,
+            min_delta=0,
+            monitor="val_loss"
+        )
         #더이상 개선의 여지가 없을때 중단한다 patience회 학습을 더 한 뒤 중단.
         history = model.fit(X_train, y_train, batch_size=batch_size, epochs=nb_epoch,
                             verbose=1, callbacks=[early_stopping],validation_data=(X_test, y_test))
