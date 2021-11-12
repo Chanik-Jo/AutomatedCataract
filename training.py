@@ -1,10 +1,12 @@
 import os
-from keras import backend as K
+
 from keras.callbacks import EarlyStopping
+
 import cv2 as cv
 import numpy as np
 from keras import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Dropout, Convolution2D, Flatten, Dense
+from keras.optimizer_v2.adagrad import Adagrad
 from keras.utils import np_utils
 import sklearn
 from sklearn.model_selection import train_test_split
@@ -91,9 +93,9 @@ if __name__ == '__main__':
 
 
     # Keras Training Parameters
-    batch_size = 50  # 한번에 몇개씩 풀것인지
+    batch_size = 32 # 한번에 몇개씩 풀것인지
     nb_classes = 2
-    nb_epoch = 5  # 총 몇회 반복할것인지.
+    nb_epoch = 30  # 총 몇회 반복할것인지.
 
     img_rows, img_col = 128, 128
     img_channels = 3
@@ -138,15 +140,17 @@ if __name__ == '__main__':
         model.add(Convolution2D(nb_filters, (nb_conv, nb_conv), activation='relu'))
         model.add(MaxPooling2D(pool_size=(nb_pool, nb_pool)))
         model.add(Dropout(0.50))
-
+        #cnn의 경우 최종만 sigmoid로 하고 나머지 층은 relu로 해주면 빠르고 정확하다고 한다.
         model.add(Flatten())
-        model.add(Dense(128, activation='relu'))
+        model.add(Dense(128, activation='sigmoid'))
         model.add(Dropout(0.5))
         model.add(Dense(nb_classes, activation='softmax'))
 
+
         model.compile(loss='categorical_crossentropy',
-                      optimizer='adam',
-                      metrics=['accuracy'])
+                      optimizer='adam',#알고봤더니 이게 adagrad 등등 여러방법이 짬뽕되어 안정적인 거였음
+                      metrics=['accuracy']
+                      )
         model.summary()
         #------------------------------------------------------------------
 
@@ -160,7 +164,9 @@ if __name__ == '__main__':
         
         2. epoch이 증가하면서 train loss 와 valid loss가 수렴해야 가장 좋다.        
         교차점에서 epoch을 결정하더라도 train과 최종 test loss와 accuracy를 비교
-        해야한다. 이러한 점검은 cross-validation으로 진행해야한다.        
+        해야한다. 이러한 점검은 cross-validation으로 진행해야한다.    
+        물론 validloss(val_loss)가 수렴했다가 증가한다는것은 과적합이 진행된다는거다.
+        val_loss가 최소인게 제일 좋다는것.    
         
         3. batch_size는 과적합과 관련이 없다. 모수의 수렴 문제와 관련이 있다.        
         배치사이즈가 작을 수록 수렴속도는 느리지만 local minimum에 빠질 가능성은 
@@ -171,12 +177,13 @@ if __name__ == '__main__':
 
         
         '''
-
+        early_stopping = tf.keras.callbacks.EarlyStopping(patience=5)
+        #더이상 개선의 여지가 없을때 중단한다 patience회 학습을 더 한 뒤 중단.
         history = model.fit(X_train, y_train, batch_size=batch_size, epochs=nb_epoch,
-                            verbose=1, validation_data=(X_test, y_test))
+                            verbose=1, callbacks=[early_stopping],validation_data=(X_test, y_test))
 
-        model.save_weights("eye1.h5")
-        model.save('eye2.h5')
+    model.save_weights("eye1.h5")
+    model.save('eye2.h5')
     '''
     save() saves the weights and the model structure to a single HDF5 file. 
     I believe it also includes things like the optimizer state. 
@@ -201,4 +208,4 @@ if __name__ == '__main__':
     print("--------------")
     print(history.history)
 
-    K.clear_session()#multiprocess.py 오류 안뜨게 만드려는 목적.  왜뜨는진 모르겠지만 일단 막아야지.
+
