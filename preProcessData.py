@@ -18,6 +18,7 @@ def create_samples(dir):
     # and augmented in parallel to the original data.
     # p.ground_truth("/path/to/ground_truth_images")
     # Add operations to the pipeline as normal:
+
     p.rotate(probability=1, max_left_rotation=5, max_right_rotation=5)
     p.flip_left_right(probability=0.5)
     p.zoom_random(probability=0.5, percentage_area=0.8)
@@ -27,7 +28,7 @@ def create_samples(dir):
 
 if __name__ == '__main__':
     dir_list = ['neg', 'pos']
-    dest = "input_path"
+    dest = "input_path2"
     # lets create a sample of 500 negative and 500 positive Images
     for img_dir in dir_list:
         print("************************Processing {0} Directory*****************************".format(img_dir))
